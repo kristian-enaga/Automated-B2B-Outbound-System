@@ -1,6 +1,6 @@
 # 📌 Portfolio 4: Automated B2B Outbound Prospecting & AI Outreach System
 
-
+![Workflow Architecture](Workflow_architecture.png)
 
 An automated, fault-tolerant B2B lead prospecting and outreach engine built with **n8n**, **Apify**, **Google Gemini AI**, **Slack (HITL)**, **Gmail**, **Airtable**, and **Google Sheets**.
 
