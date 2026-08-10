@@ -1,4 +1,4 @@
-# 📌 Portfolio 4: Automated B2B Outbound Prospecting & AI Outreach System
+# 📌Automated B2B Outbound Prospecting & AI Outreach System
 
 ![Workflow Architecture](Workflow_architecture.png)
 
