@@ -1,0 +1,1544 @@
+{
+  "name": "Automated B2B Outbound Prospecting & AI Outreach System (with Slack Approval)",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        304
+      ],
+      "id": "5af23156-7801-45c9-b085-227d0bb54df0",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        480
+      ],
+      "id": "6bdda342-5d10-4d32-b8b3-c9658770f2fd",
+      "name": "Schedule Trigger",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        368
+      ],
+      "id": "ffc132ff-180e-4a7c-8982-d397385e8683",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XbntAfEXCYTUyalp",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BNWKL21EE",
+          "mode": "list",
+          "cachedResultName": "outbound-approvals"
+        },
+        "message": "=🚨 *NEW OUTBOUND LEAD DRAFT* 🚨\n\nCompany: {{ $json.company_name }}\nEmail: {{ $json.contact_email }}\nScore: {{ $json.lead_score }}/100\n\nReasoning: \n> {{ $json.qualification_reason }}\n\nSubject: {{ $json.subject_line }}\n\n\nDraft:  {{ $json.email_body }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1904,
+        336
+      ],
+      "id": "9cfa6e9f-d5e9-4f5c-9dc0-a5ef7efa717b",
+      "name": "Slack Approval Notification",
+      "webhookId": "f6608a03-3eba-45bb-9aa9-d97ea0157c00",
+      "credentials": {
+        "slackApi": {
+          "id": "CAfJanGAVuxflX0K",
+          "name": "Slack account Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Data Normalization Script\nconst title = $json.title || \"Target Prospect\";\nconst website = $json.website || null;\n\n// Extract the first email from the 'emails' array if present\nconst email = ($json.emails && $json.emails.length > 0) ? $json.emails[0] : null;\n\nconst category = $json.categoryName || \"Local Business\";\n\nreturn {\n  company_name: title,\n  website_url: website,\n  contact_email: email,\n  business_category: category,\n  has_email: email !== null, // Helper flag for routing\n  processed_at: new Date().toISOString()\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        384
+      ],
+      "id": "b2de9ec5-8bf8-4978-82fb-f2e5064027cf",
+      "name": "Data Cleaning & Normalization"
+    },
+    {
+      "parameters": {
+        "operation": "Run actor and get dataset",
+        "actorSource": "store",
+        "actorId": {
+          "__rl": true,
+          "value": "WnMxbsRLNbPeYL6ge",
+          "mode": "list",
+          "cachedResultName": "📩📍 Google Maps Email Extractor (lukaskrivka/google-maps-with-contact-details)",
+          "cachedResultUrl": "https://console.apify.com/actors/WnMxbsRLNbPeYL6ge/input"
+        },
+        "customBody": "{\n  \"searchStringsArray\": [\n    \"Marketing Agencies in Austin TX\"\n  ],\n  \"maxCrawledPlacesPerSearch\": 3\n}"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        224,
+        384
+      ],
+      "id": "cefe4da1-4cd4-478e-912b-d5402382c65e",
+      "name": "Apify Scraping Actor",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "apifyApi": {
+          "id": "XKTPB3MNSRtdtpXg",
+          "name": "Apify account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "Run actor and get dataset",
+        "actorSource": "store",
+        "actorId": {
+          "__rl": true,
+          "value": "9Sk4JJhEma9vBKqrg",
+          "mode": "list",
+          "cachedResultName": "Contact Details Scraper (vdrmota/contact-info-scraper)",
+          "cachedResultUrl": "https://console.apify.com/actors/9Sk4JJhEma9vBKqrg/input"
+        },
+        "customBody": "={\n  \"startUrls\": [\n    {\n      \"url\": \"{{ $json.website_url }}\"\n    }\n  ],\n  \"maxRequestsPerStartUrl\": 10,\n  \"maxDepth\": 2\n}"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        672,
+        384
+      ],
+      "id": "82630982-0ca1-4756-8c01-14501bfcf340",
+      "name": "Enrich Missing Contacts (Apify)",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "apifyApi": {
+          "id": "XKTPB3MNSRtdtpXg",
+          "name": "Apify account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Extract primary contacts from Apify array output\nconst scrapedEmails = $json.emails || [];\nconst scrapedPhones = $json.phones || [];\nconst linkedIns = $json.linkedIns || [];\nconst facebooks = $json.facebooks || [];\nconst instagrams = $json.instagrams || [];\n\n// Reference clean data from 1st stage\nconst originalData = $('Data Cleaning & Normalization').item.json;\n\nreturn {\n  // 1. Data for the AI Node (Simple, Clean, Low Tokens)\n  company_name: originalData.company_name,\n  website_url: originalData.website_url,\n  business_category: originalData.business_category,\n  contact_email: scrapedEmails[0] || originalData.contact_email || null,\n  \n  // 2. Data for Google Sheets / CRM (Multi-Channel Outreach Assets)\n  phone_number: originalData.phone_number || scrapedPhones[0] || null,\n  linkedin_url: linkedIns[0] || null,\n  facebook_url: facebooks[0] || null,\n  instagram_url: instagrams[0] || null,\n  \n  // Quick status flags\n  has_email: (scrapedEmails[0] || originalData.contact_email) !== null,\n  has_socials: linkedIns.length > 0 || facebooks.length > 0\n}; "
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        384
+      ],
+      "id": "6f2efcc3-b496-4348-8c6d-0859c182fb3d",
+      "name": "Merge Lead Payload"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU",
+          "mode": "list",
+          "cachedResultName": "Dead Leads Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Logged At",
+              "displayName": "Logged At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1408,
+        704
+      ],
+      "id": "08e4808f-8303-4ff0-80bb-3db4eacaa7b7",
+      "name": "Dead Leads Log",
+      "notesInFlow": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "D0I4vFupIgPdJfgx",
+          "name": "Google Sheets account enagakristianjay@gmail.com"
+        }
+      },
+      "notes": "No Email / Unreachable Leads"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0b487040-7432-40b7-b6f7-6c28f2d37728",
+              "leftValue": "={{ $json.contact_email }}",
+              "rightValue": "t",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        384
+      ],
+      "id": "a4068326-10b2-41a0-a595-f0eccbf951b7",
+      "name": "Filter Valid Email Leads"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are Chan, an AI Automation Specialist evaluating inbound leads and drafting personalized B2B cold emails.\n\nLEAD DETAILS TO ANALYZE:\n- Company Name: {{ $json.company_name }}\n- Business Category: {{ $json.business_category }}\n- Website: {{ $json.website_url }}\n\nYOUR TASK:\n1. DYNAMICALLY SCORE & QUALIFY:\n   - Calculate `lead_score` (0-100) based on whether they are a B2B service, marketing agency, or consultant that relies on inbound site forms.\n   - Write a 1-sentence custom `qualification_reason` explaining WHY this specific company scored high or low based on their business model.\n\n2. DRAFT THE EMAIL (MUST VARY SUBJECT LINE AND BODY):\n   - Subject Line: Short 2-4 word topic line focusing on site forms (e.g., \"inbound lead workflow\", \"{{ $json.company_name }} form intake\", or \"quick note re: {{ $json.company_name }}\").\n   - Email Body:\n     Line 1 (Hook - DIFFERENT FROM SUBJECT): Start directly with a conversational question about their lead process (e.g., \"Hey {{ $json.company_name }}, when new prospective clients reach out through {{ $json.website_url }}, does someone manually copy those entries into your CRM?\"). Make the question random but related to the bottleneck and keep the \"hey {{ $json.company_name }}\".\n    Line 2 (Dynamic Automation Solution - DIVERSIFY THIS): Randomly select ONE of the following realistic automation solutions that directly matches their bottleneck:\n       • Option A (CRM Sync): \"I build simple background automations that instantly push web inquiries into your CRM without manual data entry.\"\n       • Option B (Instant Alerting): \"I set up instant Slack/SMS notifications for sales teams so new leads get called back in under 2 minutes.\"\n       • Option C (Auto-Routing): \"I build smart routing workflows that immediately assign incoming site inquiries to the right team member.\"\n       • Option D (Lead Qualification Filters): \"I build automated intake filters that score and qualify form submissions before they ever hit your calendar.\"\n     Line 3 (Low-Friction CTA): Ask if you can send over a 40-second video demo showing how it works.\n     Sign-off: Best, Chan \\n AI Automation Specialist\n\nSTRICT WRITING RULES:\n- NEVER repeat the exact subject line text inside the email body.\n- NO generic flattery or fake stats.\n- Keep sentences under 12 words. Simple, direct, human.\n\nCRITICAL INSTRUCTION: Return ONLY a raw JSON object matching this structure. Do NOT use markdown code blocks.\n\n{\n  \"lead_score\": <DYNAMIC_NUMBER_0_TO_100>,\n  \"qualification_reason\": \"<CUSTOM_1_SENTENCE_REASONING>\",\n  \"subject_line\": \"lead intake on <company_name>\",\n  \"email_body\": \"Hey team,\\n\\nWhen new prospective clients reach out through your site, do those form submissions route directly to your CRM or does someone manually move them?\\n\\nI build background automations that instantly route inbound leads and trigger immediate follow-ups so no inquiry goes cold.\\n\\nMind if I send over a short 40-second video showing how it works?\\n\\nBest,\\nChan\\nAI Automation Specialist\"\n}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1248,
+        144
+      ],
+      "id": "15853e77-ed68-4680-a823-05d037937694",
+      "name": "AI Intent Scoring & Email Drafting",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1904,
+        144
+      ],
+      "id": "e7740725-6dd4-4958-8e33-209343c91e0f",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Slack Approval Notification').item.json.data.approved }}",
+                    "rightValue": "approved: true",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "8be1584a-8707-4f59-b1a2-8cfdb8cb781e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Approved"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "92730518-70e3-468e-9247-8b252ba8143a",
+                    "leftValue": "={{ $('Slack Approval Notification').item.json.data.approved }}",
+                    "rightValue": "approved: false",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "false",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Rejected"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2144,
+        128
+      ],
+      "id": "6c0bac52-9ee9-4091-bf13-903b65d62cae",
+      "name": "Router - Approval Decision"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Parse AI Outreach Payload').item.json.contact_email }}",
+        "subject": "={{ $('Parse AI Outreach Payload').item.json.subject_line }}",
+        "emailType": "text",
+        "message": "={{ $('Parse AI Outreach Payload').item.json.email_body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2368,
+        32
+      ],
+      "id": "b2dfe8c1-c18a-4aa9-88fe-e1eee13fb150",
+      "name": "Gmail - Send Approved Outreach",
+      "webhookId": "040e019d-b147-4c8f-a972-3304c12d0b5b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Tz92W2mMBqoVhpoB",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appXNaJnWez1jRyay",
+          "mode": "list",
+          "cachedResultName": "Active Lead Engine Pipeline",
+          "cachedResultUrl": "https://airtable.com/appXNaJnWez1jRyay"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbljAnrONNwjW5aXh",
+          "mode": "list",
+          "cachedResultName": "Rejected Leads",
+          "cachedResultUrl": "https://airtable.com/appXNaJnWez1jRyay/tbljAnrONNwjW5aXh"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company Name": "={{ $('Parse AI Outreach Payload').item.json.company_name ?? '' }}",
+            "Website URL": "={{ $('Merge Lead Payload').item.json.website_url ?? ''}}",
+            "Contact Email": "={{ $('Parse AI Outreach Payload').item.json.contact_email ?? '' }}",
+            "Phone Number": "={{ $('Merge Lead Payload').item.json.phone_number ?? 'N/A' }}",
+            "LinkedIn URL": "={{ $('Merge Lead Payload').item.json.linkedin_url ?? '' }}",
+            "Processed At": "={{ $now }}",
+            "Status": "🚫 Rejected"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Website URL",
+              "displayName": "Website URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Contact Email",
+              "displayName": "Contact Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Processed At",
+              "displayName": "Processed At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Attachment Summary",
+              "displayName": "Attachment Summary",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2368,
+        256
+      ],
+      "id": "2afa93e9-678a-4e22-b047-3a5ea22c3b63",
+      "name": "Airtable - Log Rejected Outreach",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "dhTr9hmQUAfBAUaL",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appXNaJnWez1jRyay",
+          "mode": "list",
+          "cachedResultName": "Active Lead Engine Pipeline",
+          "cachedResultUrl": "https://airtable.com/appXNaJnWez1jRyay"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblPgX8nWz68ob7Og",
+          "mode": "list",
+          "cachedResultName": "Sent Leads",
+          "cachedResultUrl": "https://airtable.com/appXNaJnWez1jRyay/tblPgX8nWz68ob7Og"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company Name": "={{ $('Parse AI Outreach Payload').item.json.company_name ?? '' }}",
+            "Website URL": "={{ $('Merge Lead Payload').item.json.website_url ?? '' }}",
+            "Contact Email": "={{ $('Parse AI Outreach Payload').item.json.contact_email ?? '' }}",
+            "Phone Number": "={{ $('Merge Lead Payload').item.json.phone_number ?? 'N/A' }}",
+            "LinkedIn URL": "={{ $('Merge Lead Payload').item.json.linkedin_url ?? '' }}",
+            "Status": "🚀Sent",
+            "Processed At": "={{ $now  }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Website URL",
+              "displayName": "Website URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Contact Email",
+              "displayName": "Contact Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Processed At",
+              "displayName": "Processed At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Attachment Summary",
+              "displayName": "Attachment Summary",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2576,
+        32
+      ],
+      "id": "a997e943-f014-45dc-a09b-1e01f70617fc",
+      "name": "Airtable - Log Sent Outreach",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "dhTr9hmQUAfBAUaL",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU",
+          "mode": "list",
+          "cachedResultName": "Dead Leads Log & Log Rejected Outreach",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 893227608,
+          "mode": "list",
+          "cachedResultName": "Rejected_Outreach",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU/edit#gid=893227608"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company Name": "={{ $('Parse AI Outreach Payload').item.json.company_name ?? '' }}",
+            "Website URL": "={{ $('Merge Lead Payload').item.json.website_url ?? '' }}",
+            "Contact Email ": "={{ $('Parse AI Outreach Payload').item.json.contact_email ?? '' }}",
+            "Phone Number": "={{ $('Merge Lead Payload').item.json.phone_number ?? 'N/A' }}",
+            "LinkedIn URL": "={{ $('Merge Lead Payload').item.json.linkedin_url ?? '' }}",
+            "Processed At": "={{ $now }}",
+            "Status": "🚫 Rejected"
+          },
+          "matchingColumns": [
+            "data"
+          ],
+          "schema": [
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website URL",
+              "displayName": "Website URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Contact Email ",
+              "displayName": "Contact Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Processed At",
+              "displayName": "Processed At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2576,
+        256
+      ],
+      "id": "6e391484-eecd-437e-88cc-f03f91f34ad1",
+      "name": "Google Sheet - Log Rejected Outreach",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "D0I4vFupIgPdJfgx",
+          "name": "Google Sheets account enagakristianjay@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU",
+          "mode": "list",
+          "cachedResultName": "Dead Leads Log & Log Rejected Outreach",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1251581339,
+          "mode": "list",
+          "cachedResultName": "Sent_Outreach",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU/edit#gid=1251581339"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company Name": "={{ $('Parse AI Outreach Payload').item.json.company_name ?? '' }}",
+            "Website URL": "={{ $('Merge Lead Payload').item.json.website_url ?? '' }}",
+            "Contact Email ": "={{ $('Parse AI Outreach Payload').item.json.contact_email ?? '' }}",
+            "Phone Number": "={{ $('Merge Lead Payload').item.json.phone_number ?? 'N/A' }}",
+            "LinkedIn URL": "={{ $('Merge Lead Payload').item.json.linkedin_url ?? '' }}",
+            "Status": "🚀Sent",
+            "Processed At": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website URL",
+              "displayName": "Website URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Contact Email ",
+              "displayName": "Contact Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Processed At",
+              "displayName": "Processed At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2784,
+        32
+      ],
+      "id": "0fecb962-11fd-4f1a-97b1-8fdf4762d69c",
+      "name": "Google Sheet - Log Sent Outreach",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "D0I4vFupIgPdJfgx",
+          "name": "Google Sheets account enagakristianjay@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Business Purpose\nTo solve the outbound sales bottleneck. High-ticket agencies, SaaS platforms, and service businesses struggle because manual prospecting takes up to 70% of a sales rep's time. This automation shifts sales reps from doing boring administrative work to closing deals.",
+        "height": 224,
+        "width": 352,
+        "color": "#C41C1C"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -144
+      ],
+      "id": "a621c87e-640e-46e6-ab8d-b52c0ab60317",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 416,
+        "width": 1174,
+        "color": "#257DD0"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        224
+      ],
+      "id": "bc64d28c-7281-45eb-9657-aff463bfcd35",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 544,
+        "width": 518,
+        "color": "#B90CE9"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        -32
+      ],
+      "id": "b4ccb3e3-ba1e-4589-8a4c-309326c3927d",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 544,
+        "width": 502,
+        "color": "#E76B18"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        -32
+      ],
+      "id": "462d9cd1-4361-4e97-882f-016d28dc25e7",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 672,
+        "width": 838,
+        "color": "#1AAD61"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2112,
+        -160
+      ],
+      "id": "b514a7c7-237f-40c2-8128-5237649933c2",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU",
+          "mode": "list",
+          "cachedResultName": "Active Lead Engine Pipeline",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 588911618,
+          "mode": "list",
+          "cachedResultName": "Error Output / Failed Executions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU/edit#gid=588911618"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Error Message": "={{ $json.error?.message || $json.error || $json.message || \"Unknown Failure / Missing Data\" }}",
+            "Execution Status": "Failed Execution",
+            "Failure Stage": "={{ $prevNode.name === \"Apify Scraping Actor\" ? \"Scraper Stage\" : \"Enrichment Stage\" }}",
+            "Query / Domain": "={{ $json.query || $json.domain || \"N/A\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Failure Stage",
+              "displayName": "Failure Stage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Error Message",
+              "displayName": "Error Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Query / Domain",
+              "displayName": "Query / Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Execution Status",
+              "displayName": "Execution Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        704
+      ],
+      "id": "fae0376f-4e14-41ff-9c35-a25dc5c54b4b",
+      "name": "Apify Scraping/Enrichment Failed Executions",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "D0I4vFupIgPdJfgx",
+          "name": "Google Sheets account enagakristianjay@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 528,
+        "width": 518,
+        "color": "#EA4848"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        512
+      ],
+      "id": "ff5d53e4-c721-4a28-85fa-b2b373f513a8",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "🟦 PHASE 1: INGESTION & ENRICHMENT\n• Triggers workflow -> Scrapes LinkedIn/Web via Apify -> Cleans & normalizes lead data.",
+        "height": 80,
+        "width": 736,
+        "color": "#EFECEC"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        240
+      ],
+      "id": "788f119f-452a-4404-a180-a16d62cf042f",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "🟪 Phase 2: AI Intel & Drafting\n• Gemini scores prospect intent -> Drafts custom, highly tailored outreach email.",
+        "height": 96,
+        "width": 352,
+        "color": "#F6F1F9"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        -16
+      ],
+      "id": "c8ceebba-3af9-482d-b0e9-4efabf02fc73",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "🟧 Phase 3: Human-in-the-Loop (HITL)\n• Sends preview to Slack (`sendAndWait`) -> Waits for sales rep to click Approve or Reject.",
+        "height": 96,
+        "width": 368,
+        "color": "#F9E2E2"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        -16
+      ],
+      "id": "f2d8bfe9-06bd-4e78-9acd-7a182e6c2601",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "🟩 Phase 4: Fulfillment & Logging\n• Approved: Sent via Gmail -> Logged in Airtable & Google Sheets.\n• Rejected: Logged for review -> No email sent.",
+        "height": 112,
+        "width": 496,
+        "color": "#FFFFFF"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        -144
+      ],
+      "id": "f3859ca8-ebfa-4ab9-84d9-f1eed361323b",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "🟥 Phase 5: Fail-Safe & Edge Cases\n• Captures scraping errors & invalid emails -> Logs to Dead Leads sheet without crashing.",
+        "height": 96,
+        "width": 384,
+        "color": "#FFFFFF"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        544
+      ],
+      "id": "9b70549d-52c2-42dd-a484-fc229c4c52e9",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "🛡️ Prevents domain burning by dropping invalid email syntax",
+        "height": 144,
+        "width": 150,
+        "color": "#7B1E1E"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        880
+      ],
+      "id": "192184fb-05e2-43f0-9a79-b954efe2a6fc",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "🚨 Captures rate-limit timeouts for immediate alerting.",
+        "height": 144,
+        "width": 150,
+        "color": "#7B1E1E"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        880
+      ],
+      "id": "907a4bc1-7f16-4f45-b9c4-aecb2d0132fa",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "🚀 EXECUTIVE SUMMARY & ROI\n\n🎯 WHAT THIS ENGINE DOES:\nAutomates outbound lead enrichment, AI personalization, and Gmail outreach while keeping your sales team in 100% control.\n\n💰 BUSINESS VALUE & ROI:\n• ⏱️ Saves 70% SDR Time: Replaces hours of manual research with instant AI execution.\n• 🛡️ 100% Control (HITL): Zero rogue emails. Every message requires 1-click Slack approval.\n• 🔒 Domain Protection: Auto-scrubs invalid emails before sending to protect sender reputation.\n\n⚡ 3-STEP FLOW:\n1. INGEST & ENRICH: Scrapes lead profiles & verifies email syntax.\n2. AI INTEL: Gemini analyzes intent & drafts personalized copy.\n3. APPROVE & DELIVER: Human approves in Slack -> Sent via Gmail & logged.",
+        "height": 416,
+        "width": 784,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -336
+      ],
+      "id": "517e5145-d0c6-4f52-bba8-9126655edd9a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all items coming directly from the AI output\nconst inputItems = $input.all();\n// Get all items from the original lead payload\nconst originalLeads = $('Merge Lead Payload').all();\n\nreturn inputItems.map((item, index) => {\n  // Parse AI output string safely\n  let aiData = {};\n  try {\n    aiData = typeof item.json.text === 'string' ? JSON.parse(item.json.text) : item.json;\n  } catch (e) {\n    aiData = item.json;\n  }\n\n  // Safely grab the corresponding lead by index\n  const original = originalLeads[index]?.json || {};\n\n  return {\n    json: {\n      company_name: original.company_name || aiData.company_name || \"N/A\",\n      contact_email: original.contact_email || aiData.contact_email || \"N/A\",\n      lead_score: aiData.lead_score || 0,\n      qualification_reason: aiData.qualification_reason || \"\",\n      subject_line: aiData.subject_line || \"\",\n      email_body: aiData.email_body || \"\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        144
+      ],
+      "id": "96457589-7c16-4ac6-9dfb-6dd1baab9b2c",
+      "name": "Parse AI Outreach Payload",
+      "notesInFlow": true,
+      "notes": "Structure AI Email Output"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Apify Scraping Actor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Apify Scraping Actor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Intent Scoring & Email Drafting",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Approval Notification": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Cleaning & Normalization": {
+      "main": [
+        [
+          {
+            "node": "Enrich Missing Contacts (Apify)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify Scraping Actor": {
+      "main": [
+        [
+          {
+            "node": "Data Cleaning & Normalization",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Apify Scraping/Enrichment Failed Executions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich Missing Contacts (Apify)": {
+      "main": [
+        [
+          {
+            "node": "Merge Lead Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Apify Scraping/Enrichment Failed Executions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Lead Payload": {
+      "main": [
+        [
+          {
+            "node": "Filter Valid Email Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Valid Email Leads": {
+      "main": [
+        [
+          {
+            "node": "AI Intent Scoring & Email Drafting",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dead Leads Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Intent Scoring & Email Drafting": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Outreach Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dead Leads Log": {
+      "main": [
+        []
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Router - Approval Decision",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack Approval Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router - Approval Decision": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Send Approved Outreach",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Airtable - Log Rejected Outreach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Send Approved Outreach": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Log Sent Outreach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Log Rejected Outreach": {
+      "main": [
+        [
+          {
+            "node": "Google Sheet - Log Rejected Outreach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Log Sent Outreach": {
+      "main": [
+        [
+          {
+            "node": "Google Sheet - Log Sent Outreach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Outreach Payload": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Manila",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "2yoUrGUAyISOvdAX"
+  },
+  "versionId": "7a616435-e2fb-4cde-92da-66bbbdecf827",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8c4cd777a5b3ec797918101641527b114bf980b11c0134f7edc5eb4d08953d59"
+  },
+  "nodeGroups": [],
+  "id": "DlUpIJIHsAaa9ckv",
+  "tags": [
+    {
+      "updatedAt": "2026-07-27T01:41:52.052Z",
+      "createdAt": "2026-07-27T01:41:52.052Z",
+      "id": "mWLPR4lPdrQ8hfmc",
+      "name": "portfolio"
+    },
+    {
+      "updatedAt": "2026-08-07T03:55:27.833Z",
+      "createdAt": "2026-08-07T03:55:27.833Z",
+      "id": "uDHNjC7819XCZRh5",
+      "name": "sprint 2 portfolio build"
+    }
+  ]
+}
