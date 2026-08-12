@@ -1,22 +1,16 @@
 {
-  "name": "Automated B2B Outbound Prospecting & AI Outreach System (with Slack Approval)",
   "nodes": [
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -16,
-        304
-      ],
-      "id": "5af23156-7801-45c9-b085-227d0bb54df0",
-      "name": "When clicking ‘Execute workflow’"
-    },
     {
       "parameters": {
         "rule": {
           "interval": [
-            {}
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                5
+              ],
+              "triggerAtHour": 8
+            }
           ]
         }
       },
@@ -24,11 +18,10 @@
       "typeVersion": 1.3,
       "position": [
         -16,
-        480
+        384
       ],
       "id": "6bdda342-5d10-4d32-b8b3-c9658770f2fd",
-      "name": "Schedule Trigger",
-      "disabled": true
+      "name": "Schedule Trigger"
     },
     {
       "parameters": {
@@ -38,7 +31,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.1,
       "position": [
-        1344,
+        1392,
         368
       ],
       "id": "ffc132ff-180e-4a7c-8982-d397385e8683",
@@ -109,7 +102,8 @@
           "cachedResultName": "📩📍 Google Maps Email Extractor (lukaskrivka/google-maps-with-contact-details)",
           "cachedResultUrl": "https://console.apify.com/actors/WnMxbsRLNbPeYL6ge/input"
         },
-        "customBody": "{\n  \"searchStringsArray\": [\n    \"Marketing Agencies in Austin TX\"\n  ],\n  \"maxCrawledPlacesPerSearch\": 3\n}"
+        "customBody": "{\n  \"searchStringsArray\": [\n    \"Marketing Agencies in Austin TX\"\n  ],\n  \"maxCrawledPlacesPerSearch\": 3\n}",
+        "timeout": {}
       },
       "type": "@apify/n8n-nodes-apify.apify",
       "typeVersion": 1,
@@ -123,8 +117,8 @@
       "waitBetweenTries": 5000,
       "credentials": {
         "apifyApi": {
-          "id": "XKTPB3MNSRtdtpXg",
-          "name": "Apify account"
+          "id": "jcBBMaHD2Tqxd60t",
+          "name": "APIFY (chanchan)"
         }
       },
       "onError": "continueErrorOutput"
@@ -140,7 +134,8 @@
           "cachedResultName": "Contact Details Scraper (vdrmota/contact-info-scraper)",
           "cachedResultUrl": "https://console.apify.com/actors/9Sk4JJhEma9vBKqrg/input"
         },
-        "customBody": "={\n  \"startUrls\": [\n    {\n      \"url\": \"{{ $json.website_url }}\"\n    }\n  ],\n  \"maxRequestsPerStartUrl\": 10,\n  \"maxDepth\": 2\n}"
+        "customBody": "={\n  \"startUrls\": [\n    {\n      \"url\": \"{{ $json.website_url }}\"\n    }\n  ],\n  \"maxRequestsPerStartUrl\": 10,\n  \"maxDepth\": 2\n}",
+        "timeout": {}
       },
       "type": "@apify/n8n-nodes-apify.apify",
       "typeVersion": 1,
@@ -152,10 +147,11 @@
       "name": "Enrich Missing Contacts (Apify)",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
+      "alwaysOutputData": false,
       "credentials": {
         "apifyApi": {
-          "id": "XKTPB3MNSRtdtpXg",
-          "name": "Apify account"
+          "id": "jcBBMaHD2Tqxd60t",
+          "name": "APIFY (chanchan)"
         }
       },
       "onError": "continueErrorOutput"
@@ -173,111 +169,6 @@
       ],
       "id": "6f2efcc3-b496-4348-8c6d-0859c182fb3d",
       "name": "Merge Lead Payload"
-    },
-    {
-      "parameters": {
-        "operation": "appendOrUpdate",
-        "documentId": {
-          "__rl": true,
-          "value": "1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU",
-          "mode": "list",
-          "cachedResultName": "Dead Leads Log",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU/edit#gid=0"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {},
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "Company Name",
-              "displayName": "Company Name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Website",
-              "displayName": "Website",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Phone",
-              "displayName": "Phone",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Address",
-              "displayName": "Address",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Reason",
-              "displayName": "Reason",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Logged At",
-              "displayName": "Logged At",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        1408,
-        704
-      ],
-      "id": "08e4808f-8303-4ff0-80bb-3db4eacaa7b7",
-      "name": "Dead Leads Log",
-      "notesInFlow": true,
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "D0I4vFupIgPdJfgx",
-          "name": "Google Sheets account enagakristianjay@gmail.com"
-        }
-      },
-      "notes": "No Email / Unreachable Leads"
     },
     {
       "parameters": {
@@ -316,14 +207,14 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are Chan, an AI Automation Specialist evaluating inbound leads and drafting personalized B2B cold emails.\n\nLEAD DETAILS TO ANALYZE:\n- Company Name: {{ $json.company_name }}\n- Business Category: {{ $json.business_category }}\n- Website: {{ $json.website_url }}\n\nYOUR TASK:\n1. DYNAMICALLY SCORE & QUALIFY:\n   - Calculate `lead_score` (0-100) based on whether they are a B2B service, marketing agency, or consultant that relies on inbound site forms.\n   - Write a 1-sentence custom `qualification_reason` explaining WHY this specific company scored high or low based on their business model.\n\n2. DRAFT THE EMAIL (MUST VARY SUBJECT LINE AND BODY):\n   - Subject Line: Short 2-4 word topic line focusing on site forms (e.g., \"inbound lead workflow\", \"{{ $json.company_name }} form intake\", or \"quick note re: {{ $json.company_name }}\").\n   - Email Body:\n     Line 1 (Hook - DIFFERENT FROM SUBJECT): Start directly with a conversational question about their lead process (e.g., \"Hey {{ $json.company_name }}, when new prospective clients reach out through {{ $json.website_url }}, does someone manually copy those entries into your CRM?\"). Make the question random but related to the bottleneck and keep the \"hey {{ $json.company_name }}\".\n    Line 2 (Dynamic Automation Solution - DIVERSIFY THIS): Randomly select ONE of the following realistic automation solutions that directly matches their bottleneck:\n       • Option A (CRM Sync): \"I build simple background automations that instantly push web inquiries into your CRM without manual data entry.\"\n       • Option B (Instant Alerting): \"I set up instant Slack/SMS notifications for sales teams so new leads get called back in under 2 minutes.\"\n       • Option C (Auto-Routing): \"I build smart routing workflows that immediately assign incoming site inquiries to the right team member.\"\n       • Option D (Lead Qualification Filters): \"I build automated intake filters that score and qualify form submissions before they ever hit your calendar.\"\n     Line 3 (Low-Friction CTA): Ask if you can send over a 40-second video demo showing how it works.\n     Sign-off: Best, Chan \\n AI Automation Specialist\n\nSTRICT WRITING RULES:\n- NEVER repeat the exact subject line text inside the email body.\n- NO generic flattery or fake stats.\n- Keep sentences under 12 words. Simple, direct, human.\n\nCRITICAL INSTRUCTION: Return ONLY a raw JSON object matching this structure. Do NOT use markdown code blocks.\n\n{\n  \"lead_score\": <DYNAMIC_NUMBER_0_TO_100>,\n  \"qualification_reason\": \"<CUSTOM_1_SENTENCE_REASONING>\",\n  \"subject_line\": \"lead intake on <company_name>\",\n  \"email_body\": \"Hey team,\\n\\nWhen new prospective clients reach out through your site, do those form submissions route directly to your CRM or does someone manually move them?\\n\\nI build background automations that instantly route inbound leads and trigger immediate follow-ups so no inquiry goes cold.\\n\\nMind if I send over a short 40-second video showing how it works?\\n\\nBest,\\nChan\\nAI Automation Specialist\"\n}",
+        "text": "=You are Chan, an AI Automation Specialist evaluating inbound leads and drafting personalized B2B cold emails.\n\nLEAD DETAILS TO ANALYZE:\n- Company Name: {{ $json.company_name }}\n- Business Category: {{ $json.business_category }}\n- Website: {{ $json.website_url }}\n\nYOUR TASK:\n1. DYNAMICALLY SCORE & QUALIFY:\n   - Calculate `lead_score` (0-100) based on whether they are a B2B service, marketing agency, or consultant that relies on inbound site forms.\n   - Write a 1-sentence custom `qualification_reason` explaining WHY this specific company scored high or low based on their business model and when giving qualification_reason you should based on facts not assumption or made up.\n\n2. DRAFT THE EMAIL (MUST VARY SUBJECT LINE AND BODY):\n   - Subject Line: Short 2-4 word topic line focusing on site forms (e.g., \"inbound lead workflow\", \"{{ $json.company_name }} form intake\", or \"quick note re: {{ $json.company_name }}\").\n   - Email Body:\n     Line 1 (Hook - DIFFERENT FROM SUBJECT): Start directly with a conversational question about their lead process (e.g., \"Hey {{ $json.company_name }}, when new prospective clients reach out through {{ $json.website_url }}, does someone manually copy those entries into your CRM?\"). Make the question random but related to the bottleneck and keep the \"hey {{ $json.company_name }} team\".\n    Line 2 (Dynamic Automation Solution - DIVERSIFY THIS): Randomly select ONE of the following realistic automation solutions that directly matches their bottleneck:\n       • Option A (CRM Sync): \"I build simple background automations that instantly push web inquiries into your CRM without manual data entry.\"\n       • Option B (Instant Alerting): \"I set up instant Slack/SMS notifications for sales teams so new leads get called back in under 2 minutes.\"\n       • Option C (Auto-Routing): \"I build smart routing workflows that immediately assign incoming site inquiries to the right team member.\"\n       • Option D (Lead Qualification Filters): \"I build automated intake filters that score and qualify form submissions before they ever hit your calendar.\"\n     Line 3 (Low-Friction CTA): Ask if you can send over a 40-second video demo showing how it works.\n     Sign-off: Best, Chan \\n AI Automation Specialist\n\nSTRICT WRITING RULES:\n- NEVER repeat the exact subject line text inside the email body.\n- NO generic flattery or fake stats.\n- Keep sentences under 12 words. Simple, direct, human.\n\nCRITICAL INSTRUCTION: Return ONLY a raw JSON object matching this structure. Do NOT use markdown code blocks.\n\n{\n  \"lead_score\": <DYNAMIC_NUMBER_0_TO_100>,\n  \"qualification_reason\": \"<CUSTOM_1_SENTENCE_REASONING>\",\n  \"subject_line\": \"Lead Intake on <company_name>\", (make more human respond subject),\n  \"email_body\": \"Hey team,\\n\\nWhen new prospective clients reach out through your site, do those form submissions route directly to your CRM or does someone manually move them?\\n\\nI build background automations that instantly route inbound leads and trigger immediate follow-ups so no inquiry goes cold.\\n\\nMind if I send over a short 40-second video showing how it works?\\n\\nBest,\\nChan\\nAI Automation Specialist\"\n}",
         "hasOutputParser": true,
         "batching": {}
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        1248,
+        1312,
         144
       ],
       "id": "15853e77-ed68-4680-a823-05d037937694",
@@ -414,10 +305,12 @@
     {
       "parameters": {
         "sendTo": "={{ $('Parse AI Outreach Payload').item.json.contact_email }}",
-        "subject": "={{ $('Parse AI Outreach Payload').item.json.subject_line }}",
+        "subject": "=⚡{{ $('Parse AI Outreach Payload').item.json.subject_line }}",
         "emailType": "text",
         "message": "={{ $('Parse AI Outreach Payload').item.json.email_body }}",
-        "options": {}
+        "options": {
+          "appendAttribution": false
+        }
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
@@ -957,22 +850,6 @@
     },
     {
       "parameters": {
-        "content": "Business Purpose\nTo solve the outbound sales bottleneck. High-ticket agencies, SaaS platforms, and service businesses struggle because manual prospecting takes up to 70% of a sales rep's time. This automation shifts sales reps from doing boring administrative work to closing deals.",
-        "height": 224,
-        "width": 352,
-        "color": "#C41C1C"
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -144,
-        -144
-      ],
-      "id": "a621c87e-640e-46e6-ab8d-b52c0ab60317",
-      "name": "Sticky Note"
-    },
-    {
-      "parameters": {
         "content": "",
         "height": 416,
         "width": 1174,
@@ -992,7 +869,7 @@
         "content": "",
         "height": 544,
         "width": 518,
-        "color": "#B90CE9"
+        "color": "#DBC900"
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -1034,6 +911,149 @@
       ],
       "id": "b514a7c7-237f-40c2-8128-5237649933c2",
       "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 528,
+        "width": 518,
+        "color": "#EA4848"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        512
+      ],
+      "id": "ff5d53e4-c721-4a28-85fa-b2b373f513a8",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "🟦 PHASE 1: INGESTION & ENRICHMENT\n• Triggers workflow -> Scrapes LinkedIn/Web via Apify -> Cleans & normalizes lead data.",
+        "height": 80,
+        "width": 736,
+        "color": "#F4F0F0"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        240
+      ],
+      "id": "788f119f-452a-4404-a180-a16d62cf042f",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "🟪 Phase 2: AI Intel & Drafting\n• Gemini scores prospect intent -> Drafts custom, highly tailored outreach email.",
+        "height": 96,
+        "width": 352,
+        "color": "#F8F7F2"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        -16
+      ],
+      "id": "c8ceebba-3af9-482d-b0e9-4efabf02fc73",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "🟩 Phase 4: Fulfillment & Logging\n• Approved: Sent via Gmail -> Logged in Airtable & Google Sheets.\n• Rejected: Logged for review -> No email sent.",
+        "height": 112,
+        "width": 496,
+        "color": "#FFFFFF"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        -144
+      ],
+      "id": "f3859ca8-ebfa-4ab9-84d9-f1eed361323b",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "🟥 Phase 5: Fail-Safe & Edge Cases\n• Captures scraping errors & invalid emails -> Logs to Dead Leads sheet without crashing.",
+        "height": 96,
+        "width": 384,
+        "color": "#FFFFFF"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        544
+      ],
+      "id": "9b70549d-52c2-42dd-a484-fc229c4c52e9",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "🛡️ Prevents domain burning by dropping invalid email syntax",
+        "height": 144,
+        "width": 150,
+        "color": "#7B1E1E"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        880
+      ],
+      "id": "192184fb-05e2-43f0-9a79-b954efe2a6fc",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "🚨 Captures rate-limit timeouts for immediate alerting.",
+        "height": 144,
+        "width": 150,
+        "color": "#7B1E1E"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        880
+      ],
+      "id": "907a4bc1-7f16-4f45-b9c4-aecb2d0132fa",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "🚀 EXECUTIVE SUMMARY & ROI\n\n🎯 WHAT THIS ENGINE DOES:\nAutomates outbound lead enrichment, AI personalization, and Gmail outreach while keeping your sales team in 100% control.\n\n💰 BUSINESS VALUE & ROI:\n• ⏱️ Saves 70% SDR Time: Replaces hours of manual research with instant AI execution.\n• 🛡️ 100% Control (HITL): Zero rogue emails. Every message requires 1-click Slack approval.\n• 🔒 Domain Protection: Auto-scrubs invalid emails before sending to protect sender reputation.\n\n⚡ 3-STEP FLOW:\n1. INGEST & ENRICH: Scrapes lead profiles & verifies email syntax.\n2. AI INTEL: Gemini analyzes intent & drafts personalized copy.\n3. APPROVE & DELIVER: Human approves in Slack -> Sent via Gmail & logged.",
+        "height": 416,
+        "width": 736,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -288
+      ],
+      "id": "517e5145-d0c6-4f52-bba8-9126655edd9a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all items coming directly from the AI output\nconst inputItems = $input.all();\n// Get all items from the original lead payload\nconst originalLeads = $('Merge Lead Payload').all();\n\nreturn inputItems.map((item, index) => {\n  // Parse AI output string safely\n  let aiData = {};\n  try {\n    aiData = typeof item.json.text === 'string' ? JSON.parse(item.json.text) : item.json;\n  } catch (e) {\n    aiData = item.json;\n  }\n\n  // Safely grab the corresponding lead by index\n  const original = originalLeads[index]?.json || {};\n\n  return {\n    json: {\n      company_name: original.company_name || aiData.company_name || \"N/A\",\n      contact_email: original.contact_email || aiData.contact_email || \"N/A\",\n      lead_score: aiData.lead_score || 0,\n      qualification_reason: aiData.qualification_reason || \"\",\n      subject_line: aiData.subject_line || \"\",\n      email_body: aiData.email_body || \"\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        144
+      ],
+      "id": "96457589-7c16-4ac6-9dfb-6dd1baab9b2c",
+      "name": "Parse AI Outreach Payload",
+      "notesInFlow": true,
+      "notes": "Structure AI Email Output"
     },
     {
       "parameters": {
@@ -1123,187 +1143,150 @@
         704
       ],
       "id": "fae0376f-4e14-41ff-9c35-a25dc5c54b4b",
-      "name": "Apify Scraping/Enrichment Failed Executions",
+      "name": "Apify Error log  Failed Executions",
+      "notesInFlow": true,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "D0I4vFupIgPdJfgx",
           "name": "Google Sheets account enagakristianjay@gmail.com"
         }
-      }
+      },
+      "notes": "Scraping/Enrichment"
     },
     {
       "parameters": {
-        "content": "",
-        "height": 528,
-        "width": 518,
-        "color": "#EA4848"
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU",
+          "mode": "list",
+          "cachedResultName": "Dead Leads Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1veEOziUcQzT74shTZpTl93GxsngbcyTm6MQ2FHmvGkU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Logged At",
+              "displayName": "Logged At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
       "position": [
-        1104,
-        512
+        1408,
+        704
       ],
-      "id": "ff5d53e4-c721-4a28-85fa-b2b373f513a8",
-      "name": "Sticky Note9"
+      "id": "08e4808f-8303-4ff0-80bb-3db4eacaa7b7",
+      "name": "Dead Leads Log/No Email",
+      "notesInFlow": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "D0I4vFupIgPdJfgx",
+          "name": "Google Sheets account enagakristianjay@gmail.com"
+        }
+      },
+      "notes": "No Email / Unreachable Leads"
     },
     {
       "parameters": {
-        "content": "🟦 PHASE 1: INGESTION & ENRICHMENT\n• Triggers workflow -> Scrapes LinkedIn/Web via Apify -> Cleans & normalizes lead data.",
-        "height": 80,
-        "width": 736,
-        "color": "#EFECEC"
+        "content": "🟧 Phase 3: Human-in-the-Loop (HITL) Approval\n• Sends AI draft preview to Slack channel -> Execution pauses (sendAndWait) -> SDR approves or rejects with 1 click.",
+        "height": 112,
+        "width": 432,
+        "color": "#F8F7F2"
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        224,
-        240
-      ],
-      "id": "788f119f-452a-4404-a180-a16d62cf042f",
-      "name": "Sticky Note10"
-    },
-    {
-      "parameters": {
-        "content": "🟪 Phase 2: AI Intel & Drafting\n• Gemini scores prospect intent -> Drafts custom, highly tailored outreach email.",
-        "height": 96,
-        "width": 352,
-        "color": "#F6F1F9"
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1184,
+        1648,
         -16
       ],
-      "id": "c8ceebba-3af9-482d-b0e9-4efabf02fc73",
-      "name": "Sticky Note11"
-    },
-    {
-      "parameters": {
-        "content": "🟧 Phase 3: Human-in-the-Loop (HITL)\n• Sends preview to Slack (`sendAndWait`) -> Waits for sales rep to click Approve or Reject.",
-        "height": 96,
-        "width": 368,
-        "color": "#F9E2E2"
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1680,
-        -16
-      ],
-      "id": "f2d8bfe9-06bd-4e78-9acd-7a182e6c2601",
+      "id": "ff5b199f-afc0-4d77-add2-85c79841eae8",
       "name": "Sticky Note12"
     },
     {
-      "parameters": {
-        "content": "🟩 Phase 4: Fulfillment & Logging\n• Approved: Sent via Gmail -> Logged in Airtable & Google Sheets.\n• Rejected: Logged for review -> No email sent.",
-        "height": 112,
-        "width": 496,
-        "color": "#FFFFFF"
-      },
-      "type": "n8n-nodes-base.stickyNote",
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        2272,
-        -144
+        -16,
+        384
       ],
-      "id": "f3859ca8-ebfa-4ab9-84d9-f1eed361323b",
-      "name": "Sticky Note13"
-    },
-    {
-      "parameters": {
-        "content": "🟥 Phase 5: Fail-Safe & Edge Cases\n• Captures scraping errors & invalid emails -> Logs to Dead Leads sheet without crashing.",
-        "height": 96,
-        "width": 384,
-        "color": "#FFFFFF"
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1168,
-        544
-      ],
-      "id": "9b70549d-52c2-42dd-a484-fc229c4c52e9",
-      "name": "Sticky Note14"
-    },
-    {
-      "parameters": {
-        "content": "🛡️ Prevents domain burning by dropping invalid email syntax",
-        "height": 144,
-        "width": 150,
-        "color": "#7B1E1E"
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1392,
-        880
-      ],
-      "id": "192184fb-05e2-43f0-9a79-b954efe2a6fc",
-      "name": "Sticky Note15"
-    },
-    {
-      "parameters": {
-        "content": "🚨 Captures rate-limit timeouts for immediate alerting.",
-        "height": 144,
-        "width": 150,
-        "color": "#7B1E1E"
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1168,
-        880
-      ],
-      "id": "907a4bc1-7f16-4f45-b9c4-aecb2d0132fa",
-      "name": "Sticky Note16"
-    },
-    {
-      "parameters": {
-        "content": "🚀 EXECUTIVE SUMMARY & ROI\n\n🎯 WHAT THIS ENGINE DOES:\nAutomates outbound lead enrichment, AI personalization, and Gmail outreach while keeping your sales team in 100% control.\n\n💰 BUSINESS VALUE & ROI:\n• ⏱️ Saves 70% SDR Time: Replaces hours of manual research with instant AI execution.\n• 🛡️ 100% Control (HITL): Zero rogue emails. Every message requires 1-click Slack approval.\n• 🔒 Domain Protection: Auto-scrubs invalid emails before sending to protect sender reputation.\n\n⚡ 3-STEP FLOW:\n1. INGEST & ENRICH: Scrapes lead profiles & verifies email syntax.\n2. AI INTEL: Gemini analyzes intent & drafts personalized copy.\n3. APPROVE & DELIVER: Human approves in Slack -> Sent via Gmail & logged.",
-        "height": 416,
-        "width": 784,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        240,
-        -336
-      ],
-      "id": "517e5145-d0c6-4f52-bba8-9126655edd9a",
-      "name": "Sticky Note1"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Get all items coming directly from the AI output\nconst inputItems = $input.all();\n// Get all items from the original lead payload\nconst originalLeads = $('Merge Lead Payload').all();\n\nreturn inputItems.map((item, index) => {\n  // Parse AI output string safely\n  let aiData = {};\n  try {\n    aiData = typeof item.json.text === 'string' ? JSON.parse(item.json.text) : item.json;\n  } catch (e) {\n    aiData = item.json;\n  }\n\n  // Safely grab the corresponding lead by index\n  const original = originalLeads[index]?.json || {};\n\n  return {\n    json: {\n      company_name: original.company_name || aiData.company_name || \"N/A\",\n      contact_email: original.contact_email || aiData.contact_email || \"N/A\",\n      lead_score: aiData.lead_score || 0,\n      qualification_reason: aiData.qualification_reason || \"\",\n      subject_line: aiData.subject_line || \"\",\n      email_body: aiData.email_body || \"\"\n    }\n  };\n});"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1696,
-        144
-      ],
-      "id": "96457589-7c16-4ac6-9dfb-6dd1baab9b2c",
-      "name": "Parse AI Outreach Payload",
-      "notesInFlow": true,
-      "notes": "Structure AI Email Output"
+      "id": "5b2266e6-b358-4234-8e8b-96800151c00a",
+      "name": "e"
     }
   ],
-  "pinData": {},
   "connections": {
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "Apify Scraping Actor",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Schedule Trigger": {
       "main": [
         [
@@ -1359,7 +1342,7 @@
         ],
         [
           {
-            "node": "Apify Scraping/Enrichment Failed Executions",
+            "node": "Apify Error log  Failed Executions",
             "type": "main",
             "index": 0
           }
@@ -1377,7 +1360,7 @@
         ],
         [
           {
-            "node": "Apify Scraping/Enrichment Failed Executions",
+            "node": "Apify Error log  Failed Executions",
             "type": "main",
             "index": 0
           }
@@ -1406,7 +1389,7 @@
         ],
         [
           {
-            "node": "Dead Leads Log",
+            "node": "Dead Leads Log/No Email",
             "type": "main",
             "index": 0
           }
@@ -1422,11 +1405,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Dead Leads Log": {
-      "main": [
-        []
       ]
     },
     "Loop Over Items": {
@@ -1508,37 +1486,808 @@
           }
         ]
       ]
+    },
+    "Dead Leads Log/No Email": {
+      "main": [
+        []
+      ]
+    },
+    "e": {
+      "main": [
+        [
+          {
+            "node": "Apify Scraping Actor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
-  "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate",
-    "availableInMCP": false,
-    "timeSavedMode": "fixed",
-    "timezone": "Asia/Manila",
-    "callerPolicy": "workflowsFromSameOwner",
-    "errorWorkflow": "2yoUrGUAyISOvdAX"
+  "pinData": {
+    "Apify Scraping Actor": [
+      {
+        "title": "Blackhawk Digital Marketing",
+        "subTitle": null,
+        "description": "Web design and other marketing services offered by a full-service agency.",
+        "price": null,
+        "categoryName": "Marketing agency",
+        "address": "410 Baylor St Unit b, Austin, TX 78703",
+        "neighborhood": "Old West Austin",
+        "street": "410 Baylor St Unit b",
+        "city": "Austin",
+        "postalCode": "78703",
+        "state": "Texas",
+        "countryCode": "US",
+        "website": "https://www.blackhawkdm.com/",
+        "phone": "(512) 736-0127",
+        "phoneUnformatted": "+15127360127",
+        "claimThisBusiness": false,
+        "location": {
+          "lat": 30.2705887,
+          "lng": -97.75662
+        },
+        "locatedIn": null,
+        "floor": null,
+        "plusCode": null,
+        "menu": null,
+        "servicesLink": null,
+        "totalScore": 4.9,
+        "permanentlyClosed": false,
+        "temporarilyClosed": false,
+        "placeId": "ChIJhxZPAgm1RIYRB2h0ieTUr1I",
+        "categories": [
+          "Marketing agency",
+          "Advertising agency",
+          "Internet marketing service",
+          "Web hosting company",
+          "Website designer"
+        ],
+        "fid": "0x8644b509024f1687:0x52afd4e489746807",
+        "cid": "5958214910058194951",
+        "reviewsCount": 58,
+        "imagesCount": 214,
+        "imageCategories": [],
+        "scrapedAt": "2026-08-10T08:08:03.114Z",
+        "reserveTableUrl": null,
+        "googleFoodUrl": null,
+        "hotelStars": null,
+        "hotelDescription": null,
+        "checkInDate": null,
+        "checkOutDate": null,
+        "hotelAds": [],
+        "popularTimesLiveText": null,
+        "popularTimesLivePercent": null,
+        "popularTimesHistogram": {},
+        "openingHours": [
+          {
+            "day": "Monday",
+            "hours": "8 AM to 6 PM"
+          },
+          {
+            "day": "Tuesday",
+            "hours": "8 AM to 6 PM"
+          },
+          {
+            "day": "Wednesday",
+            "hours": "8 AM to 6 PM"
+          },
+          {
+            "day": "Thursday",
+            "hours": "8 AM to 6 PM"
+          },
+          {
+            "day": "Friday",
+            "hours": "8 AM to 6 PM"
+          },
+          {
+            "day": "Saturday",
+            "hours": "Closed"
+          },
+          {
+            "day": "Sunday",
+            "hours": "Closed"
+          }
+        ],
+        "additionalOpeningHours": {
+          "Online service hours": [
+            {
+              "day": "Monday",
+              "hours": "8 AM–6 PM"
+            },
+            {
+              "day": "Tuesday",
+              "hours": "8 AM–6 PM"
+            },
+            {
+              "day": "Wednesday",
+              "hours": "8 AM–6 PM"
+            },
+            {
+              "day": "Thursday",
+              "hours": "8 AM–6 PM"
+            },
+            {
+              "day": "Friday",
+              "hours": "8 AM–6 PM"
+            },
+            {
+              "day": "Saturday",
+              "hours": "Closed"
+            },
+            {
+              "day": "Sunday",
+              "hours": "Closed"
+            }
+          ]
+        },
+        "peopleAlsoSearch": [],
+        "placesTags": [],
+        "reviewsTags": [],
+        "additionalInfo": {
+          "Service options": [
+            {
+              "Online appointments": true
+            },
+            {
+              "Onsite services": true
+            }
+          ],
+          "Accessibility": [
+            {
+              "Wheelchair accessible entrance": true
+            },
+            {
+              "Wheelchair accessible parking lot": true
+            },
+            {
+              "Wheelchair accessible restroom": true
+            },
+            {
+              "Wheelchair accessible seating": true
+            }
+          ],
+          "Amenities": [
+            {
+              "Gender-neutral restroom": true
+            }
+          ],
+          "Crowd": [
+            {
+              "LGBTQ+ friendly": true
+            },
+            {
+              "Transgender safespace": true
+            }
+          ],
+          "Parking": [
+            {
+              "Free parking lot": true
+            },
+            {
+              "On-site parking": true
+            }
+          ]
+        },
+        "gasPrices": [],
+        "url": "https://www.google.com/maps/search/?api=1&query=Blackhawk%20Digital%20Marketing&query_place_id=ChIJhxZPAgm1RIYRB2h0ieTUr1I",
+        "searchPageUrl": "https://www.google.com/maps/search/Marketing%20Agencies%20in%20Austin%20TX?hl=en",
+        "searchString": "Marketing Agencies in Austin TX",
+        "language": "en",
+        "rank": 1,
+        "isAdvertisement": false,
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWn6qQVEXXa1QGlII1xFXJyuRqq6K91ofTm2U-su00dUB0Hj1z80jKegK-rE9JrHXQo94K439FZ-H28-M7m33xrrfC-77ecBMlMpKI8uhFbMs8NKZsc8Y5yEEfkrhfgAPjupCg8=w408-h306-k-no",
+        "kgmid": "/g/11cs1kd1nz",
+        "emails": [
+          "hello@blackhawkdm.com"
+        ],
+        "phones": [
+          "512-883-2196",
+          "(512) 736-0127"
+        ],
+        "phonesUncertain": [
+          "512-883-2196",
+          "(512) 736-0127",
+          "512-736-0127"
+        ],
+        "linkedIns": [
+          "https://www.linkedin.com/in/juan-garcia-jim%C3%A9nez-18a6531a2",
+          "http://www.linkedin.com/in/megan-rush-b9bb70298",
+          "https://www.linkedin.com/in/breanna-mcmurray",
+          "https://www.linkedin.com/in/joseph-r-porter",
+          "https://www.linkedin.com/in/sarabenson",
+          "https://www.linkedin.com/in/jonathanwindham",
+          "https://www.linkedin.com/company/blackhawk-digital-marketing"
+        ],
+        "twitters": [],
+        "instagrams": [
+          "https://www.instagram.com/blackhawkdm"
+        ],
+        "facebooks": [
+          "https://www.facebook.com/blackhawkdm"
+        ],
+        "youtubes": [],
+        "tiktoks": [],
+        "pinterests": [],
+        "discords": [],
+        "domain": "blackhawkdm.com",
+        "leadsEnrichment": []
+      },
+      {
+        "title": "HMG Creative",
+        "subTitle": null,
+        "description": "Marketing-campaign management, website design and SEO services for companies, plus logo and print work.",
+        "price": null,
+        "categoryName": "Internet marketing service",
+        "address": "2400 E Cesar Chavez St Ste 316B, Austin, TX 78702",
+        "neighborhood": "East Austin",
+        "street": "2400 E Cesar Chavez St Ste 316B",
+        "city": "Austin",
+        "postalCode": "78702",
+        "state": "Texas",
+        "countryCode": "US",
+        "website": "https://www.hmgcreative.com/",
+        "phone": "(888) 744-0464",
+        "phoneUnformatted": "+18887440464",
+        "claimThisBusiness": false,
+        "location": {
+          "lat": 30.2552423,
+          "lng": -97.7180151
+        },
+        "locatedIn": null,
+        "floor": null,
+        "plusCode": null,
+        "menu": null,
+        "servicesLink": null,
+        "totalScore": 4.9,
+        "permanentlyClosed": false,
+        "temporarilyClosed": false,
+        "placeId": "ChIJoYO8E8tKW4YRaq-j-7t-1ec",
+        "categories": [
+          "Internet marketing service",
+          "Advertising agency",
+          "Market researcher",
+          "Marketing agency",
+          "Marketing consultant",
+          "Web hosting company",
+          "Website designer"
+        ],
+        "fid": "0x865b4acb13bc83a1:0xe7d57ebbfba3af6a",
+        "cid": "16705397738646515562",
+        "reviewsCount": 34,
+        "imagesCount": 46,
+        "imageCategories": [],
+        "scrapedAt": "2026-08-10T08:08:03.116Z",
+        "reserveTableUrl": null,
+        "googleFoodUrl": null,
+        "hotelStars": null,
+        "hotelDescription": null,
+        "checkInDate": null,
+        "checkOutDate": null,
+        "hotelAds": [],
+        "popularTimesLiveText": null,
+        "popularTimesLivePercent": null,
+        "popularTimesHistogram": {},
+        "openingHours": [
+          {
+            "day": "Monday",
+            "hours": "9:30 AM to 6:30 PM"
+          },
+          {
+            "day": "Tuesday",
+            "hours": "9:30 AM to 6:30 PM"
+          },
+          {
+            "day": "Wednesday",
+            "hours": "9:30 AM to 6:30 PM"
+          },
+          {
+            "day": "Thursday",
+            "hours": "9:30 AM to 6:30 PM"
+          },
+          {
+            "day": "Friday",
+            "hours": "9:30 AM to 6:30 PM"
+          },
+          {
+            "day": "Saturday",
+            "hours": "Closed"
+          },
+          {
+            "day": "Sunday",
+            "hours": "Closed"
+          }
+        ],
+        "additionalOpeningHours": {
+          "Access": [
+            {
+              "day": "Monday",
+              "hours": "9:30 AM–5 PM"
+            },
+            {
+              "day": "Tuesday",
+              "hours": "9:30 AM–5 PM"
+            },
+            {
+              "day": "Wednesday",
+              "hours": "9:30 AM–5 PM"
+            },
+            {
+              "day": "Thursday",
+              "hours": "9:30 AM–5 PM"
+            },
+            {
+              "day": "Friday",
+              "hours": "9:30 AM–5 PM"
+            },
+            {
+              "day": "Saturday",
+              "hours": "Closed"
+            },
+            {
+              "day": "Sunday",
+              "hours": "Closed"
+            }
+          ],
+          "Online service hours": [
+            {
+              "day": "Monday",
+              "hours": "9 AM–6:30 PM"
+            },
+            {
+              "day": "Tuesday",
+              "hours": "9 AM–6:30 PM"
+            },
+            {
+              "day": "Wednesday",
+              "hours": "9 AM–6:30 PM"
+            },
+            {
+              "day": "Thursday",
+              "hours": "9 AM–6:30 PM"
+            },
+            {
+              "day": "Friday",
+              "hours": "9 AM–6:30 PM"
+            },
+            {
+              "day": "Saturday",
+              "hours": "Closed"
+            },
+            {
+              "day": "Sunday",
+              "hours": "Closed"
+            }
+          ]
+        },
+        "peopleAlsoSearch": [],
+        "placesTags": [],
+        "reviewsTags": [],
+        "additionalInfo": {
+          "From the business": [
+            {
+              "Identifies as veteran-owned": true
+            }
+          ],
+          "Service options": [
+            {
+              "Online appointments": true
+            }
+          ],
+          "Accessibility": [
+            {
+              "Wheelchair accessible entrance": true
+            },
+            {
+              "Wheelchair accessible parking lot": true
+            },
+            {
+              "Wheelchair accessible restroom": true
+            }
+          ],
+          "Amenities": [
+            {
+              "Gender-neutral restroom": true
+            }
+          ],
+          "Crowd": [
+            {
+              "LGBTQ+ friendly": true
+            }
+          ]
+        },
+        "gasPrices": [],
+        "url": "https://www.google.com/maps/search/?api=1&query=HMG%20Creative&query_place_id=ChIJoYO8E8tKW4YRaq-j-7t-1ec",
+        "searchPageUrl": "https://www.google.com/maps/search/Marketing%20Agencies%20in%20Austin%20TX?hl=en",
+        "searchString": "Marketing Agencies in Austin TX",
+        "language": "en",
+        "rank": 3,
+        "isAdvertisement": false,
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWm22Wez4hwZMNRM9PiYB5tGwSGN3qHoEZ1HoWHFrqUNGHp6p6uTrEAPUBcdXqbPdHI3V2id7-kFjYmp4hECh5o2XcHv_qNiwkeWzGB7Wz5cCkT_54p78rdcV52w7gljJVwVDbZdCw=w408-h326-k-no",
+        "kgmid": "/g/1tlkcsyj",
+        "emails": [
+          "hello@hmgcreative.com"
+        ],
+        "phones": [
+          "888-744-0464"
+        ],
+        "phonesUncertain": [
+          "888.744.0464"
+        ],
+        "linkedIns": [
+          "https://www.linkedin.com/company/1661056"
+        ],
+        "twitters": [
+          "https://www.twitter.com/hmgcreative"
+        ],
+        "instagrams": [
+          "https://instagram.com/hmgcreative"
+        ],
+        "facebooks": [
+          "https://www.facebook.com/pages/HMG-Creative/104434609596311"
+        ],
+        "youtubes": [
+          "https://www.youtube.com/user/thehmgcreativef"
+        ],
+        "tiktoks": [],
+        "pinterests": [],
+        "discords": [],
+        "domain": "hmgcreative.com",
+        "leadsEnrichment": []
+      },
+      {
+        "title": "Allegiant Digital Marketing",
+        "subTitle": null,
+        "description": null,
+        "price": null,
+        "categoryName": "Internet marketing service",
+        "address": "106 E 6th St #900-O30, Austin, TX 78701",
+        "neighborhood": "Downtown Austin",
+        "street": "106 E 6th St #900-O30",
+        "city": "Austin",
+        "postalCode": "78701",
+        "state": "Texas",
+        "countryCode": "US",
+        "website": "https://allegiantdigital.com/",
+        "phone": "(866) 645-1118",
+        "phoneUnformatted": "+18666451118",
+        "claimThisBusiness": false,
+        "location": {
+          "lat": 30.2681573,
+          "lng": -97.7423917
+        },
+        "locatedIn": null,
+        "floor": null,
+        "plusCode": null,
+        "menu": null,
+        "servicesLink": null,
+        "totalScore": 5,
+        "permanentlyClosed": false,
+        "temporarilyClosed": false,
+        "placeId": "ChIJMXxkJgE0LwYRN9AWZ5W2W_M",
+        "categories": [
+          "Internet marketing service",
+          "Advertising agency",
+          "Design agency",
+          "Marketing agency",
+          "Marketing consultant",
+          "Website designer"
+        ],
+        "fid": "0x62f340126647c31:0xf35bb6956716d037",
+        "cid": "17535810326893088823",
+        "reviewsCount": 61,
+        "imagesCount": 48,
+        "imageCategories": [],
+        "scrapedAt": "2026-08-10T08:08:03.116Z",
+        "reserveTableUrl": null,
+        "googleFoodUrl": null,
+        "hotelStars": null,
+        "hotelDescription": null,
+        "checkInDate": null,
+        "checkOutDate": null,
+        "hotelAds": [],
+        "popularTimesLiveText": null,
+        "popularTimesLivePercent": null,
+        "popularTimesHistogram": {},
+        "openingHours": [
+          {
+            "day": "Monday",
+            "hours": "8 AM to 8 PM"
+          },
+          {
+            "day": "Tuesday",
+            "hours": "8 AM to 8 PM"
+          },
+          {
+            "day": "Wednesday",
+            "hours": "8 AM to 8 PM"
+          },
+          {
+            "day": "Thursday",
+            "hours": "8 AM to 8 PM"
+          },
+          {
+            "day": "Friday",
+            "hours": "8 AM to 8 PM"
+          },
+          {
+            "day": "Saturday",
+            "hours": "8 AM to 5 PM"
+          },
+          {
+            "day": "Sunday",
+            "hours": "Closed"
+          }
+        ],
+        "peopleAlsoSearch": [],
+        "placesTags": [],
+        "reviewsTags": [],
+        "additionalInfo": {
+          "From the business": [
+            {
+              "Small business": true
+            }
+          ],
+          "Service options": [
+            {
+              "Online appointments": true
+            },
+            {
+              "Onsite services": true
+            },
+            {
+              "American Sign Language": true
+            }
+          ],
+          "Accessibility": [
+            {
+              "Wheelchair accessible entrance": true
+            },
+            {
+              "Wheelchair accessible parking lot": true
+            },
+            {
+              "Wheelchair accessible restroom": true
+            },
+            {
+              "Wheelchair accessible seating": true
+            }
+          ],
+          "Amenities": [
+            {
+              "Gender-neutral restroom": true
+            }
+          ],
+          "Crowd": [
+            {
+              "LGBTQ+ friendly": true
+            },
+            {
+              "Transgender safespace": true
+            }
+          ],
+          "Planning": [
+            {
+              "Appointment required": true
+            }
+          ],
+          "Parking": [
+            {
+              "Paid parking garage": true
+            },
+            {
+              "Paid parking lot": true
+            },
+            {
+              "Paid street parking": true
+            }
+          ]
+        },
+        "gasPrices": [],
+        "url": "https://www.google.com/maps/search/?api=1&query=Allegiant%20Digital%20Marketing&query_place_id=ChIJMXxkJgE0LwYRN9AWZ5W2W_M",
+        "searchPageUrl": "https://www.google.com/maps/search/Marketing%20Agencies%20in%20Austin%20TX?hl=en",
+        "searchString": "Marketing Agencies in Austin TX",
+        "language": "en",
+        "rank": 2,
+        "isAdvertisement": false,
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWlJJQonQ9HUTie90oeMXJxaec7trauPu42BNuxcjb2wJuRhaKoxRCrC1ILddB99cFaDuJp2PEbHarbrbs7egjBv-qwSkcljdiD5qKZaOVr8P7uGklgwuXTwn9VWHihgGM73LNnW=w426-h240-k-no",
+        "kgmid": "/g/11sqj__k4f",
+        "emails": [],
+        "phones": [
+          "866-298-1910"
+        ],
+        "phonesUncertain": [
+          "866-298-1910"
+        ],
+        "linkedIns": [
+          "https://www.linkedin.com/company/allegiant-digital-marketing"
+        ],
+        "twitters": [
+          "https://twitter.com/allegiantdm"
+        ],
+        "instagrams": [
+          "https://www.instagram.com/allegiantdigital"
+        ],
+        "facebooks": [
+          "https://www.facebook.com/allegiantdigital"
+        ],
+        "youtubes": [
+          "https://www.youtube.com/@allegiantdigitalmarketing",
+          "https://www.youtube.com/channel/UCLjt_uyV8GpcgzoaaJoDgbw"
+        ],
+        "tiktoks": [],
+        "pinterests": [],
+        "discords": [],
+        "domain": "allegiantdigital.com",
+        "leadsEnrichment": []
+      }
+    ],
+    "Enrich Missing Contacts (Apify)": [
+      {
+        "depth": 0,
+        "originalStartUrl": "https://www.blackhawkdm.com/",
+        "scrapedUrls": [
+          "https://blackhawkdm.com/",
+          "https://blackhawkdm.com/web/web-support-services/",
+          "https://blackhawkdm.com/contact/",
+          "https://blackhawkdm.com/about/careers/",
+          "https://blackhawkdm.com/social-media-agency/",
+          "https://blackhawkdm.com/about/",
+          "https://blackhawkdm.com/about/giving-back/",
+          "https://blackhawkdm.com/social/social-media-marketing/",
+          "https://blackhawkdm.com/blog/",
+          "https://blackhawkdm.com/about/our-pets/"
+        ],
+        "domain": "blackhawkdm.com",
+        "emails": [
+          "hello@blackhawkdm.com"
+        ],
+        "phones": [
+          "512-883-2196",
+          "(512) 736-0127"
+        ],
+        "phonesUncertain": [
+          "512-883-2196",
+          "(512) 736-0127",
+          "512-736-0127"
+        ],
+        "linkedIns": [
+          "https://www.linkedin.com/in/juan-garcia-jim%C3%A9nez-18a6531a2",
+          "http://www.linkedin.com/in/megan-rush-b9bb70298",
+          "https://www.linkedin.com/in/breanna-mcmurray",
+          "https://www.linkedin.com/in/joseph-r-porter",
+          "https://www.linkedin.com/in/sarabenson",
+          "https://www.linkedin.com/in/jonathanwindham",
+          "https://www.linkedin.com/company/blackhawk-digital-marketing"
+        ],
+        "twitters": [],
+        "instagrams": [
+          "https://www.instagram.com/blackhawkdm"
+        ],
+        "facebooks": [
+          "https://www.facebook.com/blackhawkdm"
+        ],
+        "youtubes": [],
+        "tiktoks": [],
+        "pinterests": [],
+        "discords": [],
+        "snapchats": [],
+        "threads": [],
+        "telegrams": [],
+        "reddits": [],
+        "whatsapps": [],
+        "leadsEnrichment": []
+      },
+      {
+        "depth": 0,
+        "originalStartUrl": "https://www.hmgcreative.com/",
+        "scrapedUrls": [
+          "https://hmgcreative.com/",
+          "https://hmgcreative.com/careers/",
+          "https://hmgcreative.com/about/",
+          "https://hmgcreative.com/blog/",
+          "https://hmgcreative.com/contact/",
+          "https://hmgcreative.com/10-lgbtqia-owned-businesses-to-support-in-austin/",
+          "https://hmgcreative.com/engagement-options/",
+          "https://hmgcreative.com/managed-wordpress-hosting/",
+          "https://hmgcreative.com/our-work/",
+          "https://hmgcreative.com/careers/"
+        ],
+        "domain": "hmgcreative.com",
+        "emails": [
+          "hello@hmgcreative.com"
+        ],
+        "phones": [
+          "888-744-0464"
+        ],
+        "phonesUncertain": [
+          "888.744.0464"
+        ],
+        "linkedIns": [
+          "https://www.linkedin.com/company/1661056"
+        ],
+        "twitters": [
+          "https://www.twitter.com/hmgcreative"
+        ],
+        "instagrams": [
+          "https://instagram.com/hmgcreative"
+        ],
+        "facebooks": [
+          "https://www.facebook.com/pages/HMG-Creative/104434609596311"
+        ],
+        "youtubes": [
+          "https://www.youtube.com/user/thehmgcreativef"
+        ],
+        "tiktoks": [],
+        "pinterests": [],
+        "discords": [],
+        "snapchats": [],
+        "threads": [],
+        "telegrams": [],
+        "reddits": [],
+        "whatsapps": [],
+        "leadsEnrichment": []
+      },
+      {
+        "depth": 0,
+        "originalStartUrl": "https://allegiantdigital.com/",
+        "scrapedUrls": [
+          "https://allegiantdigital.com/",
+          "https://allegiantdigital.com/social-media-marketing/",
+          "https://allegiantdigital.com/contact/",
+          "https://allegiantdigital.com/blog/author/allegiantseo/",
+          "https://allegiantdigital.com/blog/author/allegiantdigital/",
+          "https://allegiantdigital.com/blog/top-4-ppc-mistakes-2026/",
+          "https://allegiantdigital.com/blog/why-social-media-presence-matters-for-businesses/",
+          "https://allegiantdigital.com/blog/social-media-post-frequency/",
+          "https://allegiantdigital.com/about/",
+          "https://allegiantdigital.com/careers/"
+        ],
+        "domain": "allegiantdigital.com",
+        "emails": [
+          "info@allegiantdigital.com",
+          "cmarkham@allegiantdigital.com"
+        ],
+        "phones": [
+          "866-298-1910",
+          "8662981910"
+        ],
+        "phonesUncertain": [
+          "866-298-1910",
+          "2192 2022"
+        ],
+        "linkedIns": [
+          "https://www.linkedin.com/company/allegiant-digital-marketing",
+          "https://www.linkedin.com/in/chad-markham"
+        ],
+        "twitters": [
+          "https://twitter.com/allegiantdm"
+        ],
+        "instagrams": [
+          "https://www.instagram.com/allegiantdigital"
+        ],
+        "facebooks": [
+          "https://www.facebook.com/allegiantdigital"
+        ],
+        "youtubes": [
+          "https://www.youtube.com/@allegiantdigitalmarketing",
+          "https://www.youtube.com/channel/UCLjt_uyV8GpcgzoaaJoDgbw",
+          "https://www.youtube.com/watch?v=eIS0A6tf4vE"
+        ],
+        "tiktoks": [],
+        "pinterests": [],
+        "discords": [],
+        "snapchats": [],
+        "threads": [],
+        "telegrams": [],
+        "reddits": [],
+        "whatsapps": [],
+        "leadsEnrichment": []
+      }
+    ]
   },
-  "versionId": "7a616435-e2fb-4cde-92da-66bbbdecf827",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8c4cd777a5b3ec797918101641527b114bf980b11c0134f7edc5eb4d08953d59"
-  },
-  "nodeGroups": [],
-  "id": "DlUpIJIHsAaa9ckv",
-  "tags": [
-    {
-      "updatedAt": "2026-07-27T01:41:52.052Z",
-      "createdAt": "2026-07-27T01:41:52.052Z",
-      "id": "mWLPR4lPdrQ8hfmc",
-      "name": "portfolio"
-    },
-    {
-      "updatedAt": "2026-08-07T03:55:27.833Z",
-      "createdAt": "2026-08-07T03:55:27.833Z",
-      "id": "uDHNjC7819XCZRh5",
-      "name": "sprint 2 portfolio build"
-    }
-  ]
+  }
 }
