@@ -2,7 +2,7 @@
 
 [![Loom Video Walkthrough](https://img.shields.io/badge/Loom-Watch%20Video%20Walkthrough-6667AB?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/5d3416feda7148bbbd60704ab9b5976e)
 
-![Workflow Architecture](./Outbound_leads.png)
+![Workflow Architecture](./Outbound_Leads.png)
 
 An automated, fault-tolerant B2B lead prospecting and outreach engine built with **n8n**, **Apify**, **Google Gemini AI**, **Slack (HITL)**, **Gmail**, **Airtable**, and **Google Sheets**.
 
