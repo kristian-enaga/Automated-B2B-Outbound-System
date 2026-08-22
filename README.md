@@ -45,8 +45,6 @@ Here is the verified execution log confirming successful end-to-end data process
 
 ## 🧩 Node-by-Node Breakdown
 
-Here is a plain-English breakdown of every node engineered into this pipeline and the specific business value each module delivers:
-
 - **1. Schedule Trigger (Execution Ingestion):**
   - *What it does:* Triggers outreach execution on a scheduled batch timer or manual run to kick off outbound prospecting runs.
   - *Value:* Automates batch processing without manual intervention while maintaining controlled execution intervals.
