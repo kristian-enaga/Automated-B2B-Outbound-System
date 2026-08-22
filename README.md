@@ -41,6 +41,70 @@ Here is the verified execution log confirming successful end-to-end data process
 ![JSON Output Verification](./outbound-json-payload.png.png)
 *Figure 2: Structured JSON payload showing cleaned prospect data, intent scoring, and generated email body.*
 
+---
+
+## 🧩 Node-by-Node Breakdown
+
+Here is a plain-English breakdown of every node engineered into this pipeline and the specific business value each module delivers:
+
+- **1. Schedule Trigger (Execution Ingestion):**
+  - *What it does:* Triggers outreach execution on a scheduled batch timer or manual run to kick off outbound prospecting runs.
+  - *Value:* Automates batch processing without manual intervention while maintaining controlled execution intervals.
+
+- **2. Apify Scraping Actor (Target Extraction):**
+  - *What it does:* Scrapes target accounts from Apollo/LinkedIn, extracts prospect profile details, and collects company metadata.
+  - *Value:* Eliminates manual SDR time spent hunting for prospect details across external platforms.
+
+- **3. Data Cleansing & Normalization (Deliverability Protection):**
+  - *What it does:* Validates lead email formats, strips malformed characters, and filters out unverified domains before execution.
+  - *Value:* Protects domain health and sender reputation by preventing high bounce rates and spam traps.
+
+- **4. Gemini Personalization API (Intel & Draft Generation):**
+  - *What it does:* Analyzes lead profile metadata and generates personalized, high-converting sales email drafts using Google Gemini AI.
+  - *Value:* Delivers tailored outreach at scale while replacing hours of manual email drafting per lead.
+
+- **5. Merge Lead Payload (Data Consolidation):**
+  - *What it does:* Merges the raw lead input data with the generated AI draft into a single unified JSON payload.
+  - *Value:* Guarantees state persistence and ensures no prospect context is lost prior to human review.
+
+- **6. Parse AI Outreach Payload (Data Formatting):**
+  - *What it does:* Formats and extracts key email attributes (subject line, body text, prospect details) into clean parameters for downstream nodes.
+  - *Value:* Standardizes payload structure for seamless Slack notification formatting and interactive approval routing.
+
+- **7. Loop Over Items (Batch Control):**
+  - *What it does:* Iterates sequentially through enriched lead records to handle individual approval workflows one lead at a time.
+  - *Value:* Prevents rate limits and ensures every single outreach attempt undergoes individual approval tracking.
+
+- **8. Slack Approval Notification (HITL Gatekeeper):**
+  - *What it does:* Sends an interactive preview message into Slack using `sendAndWait`, holding execution until a sales rep clicks **Approve** or **Reject**.
+  - *Value:* Guarantees 100% human control over outreach, eliminating rogue AI messaging and preserving brand integrity.
+
+- **9. Router - Approval Decision (Conditional Branching):**
+  - *What it does:* Evaluates rep action from Slack and branches execution into dedicated **Approved** or **Rejected** outreach handling paths.
+  - *Value:* Automates downstream routing dynamically based on real-time human decision-making.
+
+- **10. Gmail - Send Approved Outreach (Message Fulfillment):**
+  - *What it does:* Automatically dispatches approved personalized emails directly to the prospect's inbox via Gmail API.
+  - *Value:* Streamlines delivery instantly upon approval without needing manual copy-pasting.
+
+- **11. Airtable - Log Sent Outreach & Google Sheet - Log Sent Outreach (Approved Audit Trail):**
+  - *What it does:* Dual-logs successfully dispatched campaigns, timestamps, and approved email copy into Airtable and Google Sheets.
+  - *Value:* Delivers a complete, real-time reporting dashboard and immutable audit trail for team operations.
+
+- **12. Airtable - Log Rejected Outreach & Google Sheet - Log Rejected Outreach (Rejected Audit Trail):**
+  - *What it does:* Captures rejected drafts, feedback notes, and prospect IDs, writing them to secondary Airtable and Google Sheets tables.
+  - *Value:* Retains rejection history for AI prompt tuning and audit tracking without clogging active sales pipelines.
+
+- **13. Apify Error Try-catch (Scraper Fail-Safe):**
+  - *What it does:* Isolates scraping errors, rate limits, or bad lead inputs from halting the primary extraction pipeline.
+  - *Value:* Prevents scraper bottlenecks from crashing execution and logs bad entries separately.
+
+- **14. Error Handling - Catch & Route to Error System (Global Resilience Layer):**
+  - *What it does:* Captures unhandled workflow errors, network timeouts, or API failures and dispatches crash payloads to alerting channels.
+  - *Value:* Prevents silent workflow failures and guarantees zero lost lead state during system errors.
+ 
+  ---
+
 ## 🛠️ Tech Stack & Integrations
 * **Automation Engine:** n8n
 * **Lead Scraping & Enrichment:** Apify Actors
