@@ -1,5 +1,14 @@
 # 📌 Automated B2B Outbound Prospecting & AI Outreach System
 
+
+Production-grade n8n engine that turns raw prospect data into personalized, human-approved outbound emails—so agencies and SaaS teams run high-volume outreach without burning domains or losing control.
+
+- 70%+ SDR time saved on research, cleaning, and draft writing
+- 100% human-in-the-loop control via Slack approval before any email is sent
+- Fault-tolerant design with error handling and full audit logs in Airtable/Sheets
+
+**Stack:** n8n + Apify + Gemini + Slack (HITL) + Gmail + Airtable/Google Sheets
+---
 [![Loom Video Walkthrough](https://img.shields.io/badge/Loom-Watch%20Video%20Walkthrough-6667AB?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/5d3416feda7148bbbd60704ab9b5976e)
 
 ![Workflow Architecture](./Outbound_Leads.png)
